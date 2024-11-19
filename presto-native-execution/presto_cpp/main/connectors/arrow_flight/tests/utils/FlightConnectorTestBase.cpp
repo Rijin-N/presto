@@ -15,8 +15,13 @@ using velox::exec::test::OperatorTestBase;
 void FlightConnectorTestBase::SetUp() {
   OperatorTestBase::SetUp();
 
-  connector::registerConnectorFactory(
-      std::make_shared<presto::connector::afc::ArrowFlightConnectorFactory>());
+  if (!velox::connector::hasConnectorFactory(
+          presto::connector::afc::ArrowFlightConnectorFactory::
+              kArrowFlightConnectorName)) {
+    connector::registerConnectorFactory(
+        std::make_shared<
+            presto::connector::afc::ArrowFlightConnectorFactory>());
+  }
   connector::registerConnector(
       connector::getConnectorFactory(
           ArrowFlightConnectorFactory::kArrowFlightConnectorName)
