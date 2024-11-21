@@ -16,7 +16,7 @@ using namespace velox::connector;
 class CallOptionsAddHeaders : public FlightCallOptions, public AddCallHeaders {
  public:
   void AddHeader(const std::string& key, const std::string& value) override {
-    headers.push_back(std::make_pair(key, value));
+    headers.emplace_back(key, value);
   }
 };
 
@@ -55,7 +55,7 @@ FlightDataSource::FlightDataSource(
 
 void FlightDataSource::addSplit(std::shared_ptr<ConnectorSplit> split) {
   auto flightSplit = std::dynamic_pointer_cast<FlightSplit>(split);
-  VELOX_CHECK(flightSplit, "FlightDataSource recieved wrong type of split");
+  VELOX_CHECK(flightSplit, "FlightDataSource received wrong type of split");
 
   auto& locs = flightSplit->locations;
   Location loc;
@@ -95,7 +95,7 @@ void FlightDataSource::addSplit(std::shared_ptr<ConnectorSplit> split) {
   authenticator_->authenticateClient(
       client, flightSplit->extraCredentials, headerWriter);
 
-  auto ticket = Ticket{.ticket{flightSplit->ticket}};
+  auto ticket = Ticket{flightSplit->ticket};
   auto readerResult = client->DoGet(callOpts, ticket);
   VELOX_CHECK(
       readerResult.ok(),
